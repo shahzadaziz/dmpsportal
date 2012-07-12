@@ -1,0 +1,5 @@
+name = Amana Static Pages
+description = This modules contains the implementation of different static pages e.g. 'Deal of the day' and 'Custom page'.
+version = 6.x
+core = 6.x
+package = Amana

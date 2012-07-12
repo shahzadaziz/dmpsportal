@@ -1,0 +1,364 @@
+<?php
+
+function amana_static_pages_perm(){
+  return array('administer custom page','administer deal of the day');
+}
+
+function amana_static_pages_menu(){
+  $menus = array();
+  $menus['custom-page'] = array(
+    'title' => '',
+    'description' => 'Custom page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('custom_page'),
+    'access arguments' => array('administer custom page'),
+    'type' => MENU_CALLBACK
+  );
+
+  $menus['deal-of-the-day'] = array(
+    'title' => '',
+    'description' => 'Deal of the day page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('deal_of_the_day_page'),
+    'access arguments' => array('administer deal of the day'),
+    'type' => MENU_CALLBACK
+  );
+
+  $menus['amana_static_pages_change_product_view_image_by_ajax'] = array(
+    'description' => 'Change the product image on add/edit hotspot page',
+    'page callback' => 'amana_static_pages_change_product_view_image_change',
+    'type' => MENU_CALLBACK,
+    'access callback' => true
+  );
+
+  $menus['amana_static_pages_change_product_view_by_ajax'] = array(
+    'description' => 'Change the product image on add/edit hotspot page',
+    'page callback' => 'amana_static_pages_change_product_view_change',
+    'type' => MENU_CALLBACK,
+    'access callback' => true
+  );
+
+  $menus['amana_static_pages_change_existing_hotspots_by_ajax'] = array(
+    'description' => 'Change the product image on add/edit hotspot page',
+    'page callback' => 'amana_static_pages_change_existing_hotspots',
+    'type' => MENU_CALLBACK,
+    'access callback' => true
+  );
+
+  $menus['admin/settings/link_pic'] = array(
+    'title' => 'Resized images',
+    'description' => 'set the dimensions of resized images for iPad, iPad, iPhone, iPhone4 and website\'s flash widget' ,
+   'page callback' => 'drupal_get_form',
+    'page arguments' => array('frontpage_link_pic'),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('administer custom page')
+  );
+
+  $menus['amana_static_pages_reuse_existing_hotspot_information_by_ajax'] = array(
+    'description' => '',
+    'page callback' => 'amana_static_pages_reuse_existing_hotspot_information',
+    'type' => MENU_CALLBACK,
+    'access callback' => true
+  );
+
+  $menus['whatsnew'] = array(
+    'description' => '',
+    'page callback' => 'amana_static_pages_whatsnew',
+    'type' => MENU_CALLBACK,
+    'access callback' => true
+  );
+
+  //Craftsman CLUB
+  $menus['join_number'] = array(
+    'description' => '',
+    'page callback' => 'amana_static_pages_join_number',
+    'type' => MENU_CALLBACK,
+    'access callback' => true
+  );
+
+
+  $menus['club_podcast'] = array(
+    'description' => '',
+    'page callback' => 'amana_static_pages_club_podcast',
+    'type' => MENU_CALLBACK,
+    'access callback' => true
+  );
+
+  
+
+  
+
+  return $menus;
+}
+
+function amana_static_pages_theme(){
+  return array(
+    'custom_page' => array(
+      'arguments' => array('form' => NULL),
+      'template' => 'custom_page'
+    ),
+    'deal_of_the_day_page' => array(
+      'arguments' => array('form'),
+      'function' => 'theme_deal_of_the_day_page'
+    ),
+    'frontpage_link_pic' => array(
+      'arguments' => array('form'),
+      'function' => 'theme_frontpage_link_pic'
+    ),
+
+    'club_podcast_form' => array(
+      'arguments' => array('form'),
+      'function' => 'theme_club_podcast_form'
+    )
+    );
+}
+
+
+function deal_of_the_day_page(){
+  $form = array();
+
+  $form['page_url'] = array(
+    '#title' => t('Page URL'),
+    '#type' => 'textfield',
+    '#description' => t('e.g. http://www.craftsman.com'),
+    '#default_value' => variable_get('deal_of_the_day_page_url', '') ,
+    '#required' => TRUE
+  );
+
+  $form['email_subject'] = array(
+    '#title' => t('E-mail Subject'),
+    '#type' => 'textfield',    
+    '#default_value' => variable_get('deal_of_the_day_email_subject', ''),
+    '#required' => TRUE
+  );
+
+  $form['sms_email_body'] = array(
+    '#title' => t('SMS/E-mail body'),
+    '#type' => 'textarea',    
+    '#default_value' => variable_get('deal_of_the_day_sms_email_body', ''),
+    '#required' => TRUE
+  );
+
+  $form['deal_submit_button'] = array(
+    '#title' => t('Save'),
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#required' => TRUE
+  );
+
+  return $form;
+}
+
+function theme_deal_of_the_day_page($form){
+  $output = '';
+  $output .= '<div id="deal-of-the-day">';
+  $output .= drupal_render($form);
+  $output .= '</div>';
+  return $output;
+}
+
+function custom_page(){
+  $form = array();
+
+  $form['page_url'] = array(
+    '#title' => t('Live Studio Youtube URL'),
+    '#type' => 'textfield',
+    '#description' => t('e.g. http://www.craftsman.com'),
+    '#default_value' => variable_get('custom_page_url', ''),
+    '#required' => TRUE
+  );
+
+  $form['custom_submit_button'] = array(
+    '#title' => t('Save'),
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#required' => TRUE
+  );
+
+  return $form;
+}
+
+function theme_custom_page($form){
+  $output = '';
+  $output .= '<div id="deal-of-the-day">';
+  $output .= drupal_render($form);
+  $output .= '</div>';
+  return $output;
+}
+
+function deal_of_the_day_page_submit($form, &$form_state){  
+  variable_set('deal_of_the_day_page_url',$form['page_url']['#value']);
+  variable_set('deal_of_the_day_email_subject',$form['email_subject']['#value']);
+  variable_set('deal_of_the_day_sms_email_body',$form['sms_email_body']['#value']);
+  drupal_set_message('The changes have been saved.');
+}
+
+function custom_page_submit($form, &$form_state){  
+  variable_set('custom_page_url',$form['page_url']['#value']);
+  drupal_set_message('The changes have been saved.');
+}
+
+function amana_static_pages_change_product_view_image_change(){
+    
+  $pid = $_GET['pid'];
+  $new_product = node_load($pid);
+  $pimg_path = url($new_product->field_demo_image[0][filepath]);
+
+  drupal_json(array('img_path' => $pimg_path));
+}
+
+function amana_static_pages_change_product_view_change(){
+  $pid = $_GET['pid'];  
+  $product = node_load($pid);
+  $pimg_path = url($product->field_demo_image[0][filepath]);
+  drupal_json(array('img_path' => $pimg_path));
+}
+
+function amana_static_pages_change_existing_hotspots(){
+  $pid = $_GET['pid'];
+
+  $hotspots = array();
+  $result = db_query('select n.nid as id,n.title as name from {content_type_hotspot} cth inner join {node} n on cth.nid=n.nid where cth.field_hotspot_product_value=' . $pid);
+  while ($hotspot = db_fetch_object($result)) {
+    $hotspots[$hotspot->id] = $hotspot->name;
+  }
+  
+  drupal_json(array('hotspots' => $hotspots));
+}
+
+function frontpage_link_pic(){
+  $form = array();
+  
+  $pic = variable_get('frontpage_pic', '');
+  if($pic && !empty ($pic)){
+    $image = '<b>Image:</b><br/><img alt="" src="/sites/default/files/'.$pic.'" /><br /><b>Change image: </b>';
+  }
+  $form['#attributes'] = array('enctype' => 'multipart/form-data');
+  $form['frontpage_link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#default_value' => variable_get('frontpage_link', 203),
+    '#suffix' => '<div class="ifilefield">
+                    '.$image.
+                    '<input id="frontpage_pic" name="frontpage_pic" type="file" size="30" />
+                    <div class="description">Maximum Filesize: <em>128 MB</em><br>Allowed Extensions: <em>png gif jpg jpeg</em><br>Images must be exactly 160x160 pixels</div>
+                 </div>',
+  );
+
+  $form['i_submit_button'] = array(
+    '#title' => t('Save'),
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+function theme_frontpage_link_pic($form){
+  $output = '';
+  $output .= '<div id="resize_settings_form">';
+  $output .= drupal_render($form);
+  $output .= '</div>';
+  return $output;
+}
+
+function frontpage_link_pic_validate($form, &$form_state){
+  if($_FILES["frontpage_pic"]["type"] && $_FILES["frontpage_pic"]["type"] !== 'image/jpeg' && $_FILES["frontpage_pic"]["type"] !== 'image/gif' && $_FILES["frontpage_pic"]["type"] !== 'image/png'){
+    form_set_error('frontpage_pic',t('The selected file '. $_FILES["frontpage_pic"]['name'] . ' could not be uploaded. Only files with the following extensions are allowed: png, gif, jpg, jpeg.'));
+  }
+  $info = getimagesize($_FILES["frontpage_pic"]["tmp_name"]);
+  if($_FILES["frontpage_pic"]["tmp_name"] && ($info[0]!=160 || $info[1]!=160)
+     && ($_FILES["frontpage_pic"]["type"] === 'image/jpeg' || $_FILES["frontpage_pic"]["type"] === 'image/gif' || $_FILES["frontpage_pic"]["type"] === 'image/png')){
+    form_set_error('',t('The selected file '. $_FILES["frontpage_pic"]['name'] . ' could not be uploaded. The image must be exactly 160x160 pixels.'));
+  }
+}
+
+function frontpage_link_pic_submit($form, &$form_state){
+  drupal_set_message(t('Your changes has been updated.'));
+  variable_set('frontpage_link', $form_state['values']['frontpage_link']);
+  if ($_FILES['frontpage_pic']['tmp_name'] && $_FILES['frontpage_pic']['name']) {
+    $oldpic = variable_get('frontpage_pic', '');
+    file_delete('sites/default/files/'.$oldpic);
+    variable_set('frontpage_pic', 'iphone_frontpage_pic.' . getFileExtensionFromName($_FILES["frontpage_pic"]["name"]));
+    $success = move_uploaded_file($_FILES["frontpage_pic"]["tmp_name"], 'sites/default/files/iphone_frontpage_pic.' . getFileExtensionFromName($_FILES["frontpage_pic"]["name"]));
+    if($success){
+      if(file_exists('sites/default/files/'.variable_get('frontpage_pic', ''))){
+        chmod('sites/default/files/'.variable_get('frontpage_pic', ''), 0777);
+      }
+      file_delete('sites/default/files/resized_images/'.$oldpic);
+      image_resize('sites/default/files/'.variable_get('frontpage_pic', ''), 'sites/default/files/resized_images/'.variable_get('frontpage_pic', ''),80,80);
+      if(file_exists('sites/default/files/resized_images/'.variable_get('frontpage_pic', ''))){
+        chmod('sites/default/files/resized_images/'.variable_get('frontpage_pic', ''),0777);
+      }
+    }
+  }
+}
+
+function getFileExtensionFromName($filename) {
+  $extension = '';
+  for($i=strlen($filename)-1; $i>=0; $i--){
+    if($filename[$i]=='.'){
+      break;
+    }
+    $extension = $filename[$i].$extension;
+  }
+  return $extension;
+}
+
+function amana_static_pages_reuse_existing_hotspot_information(){
+  $reuse = $_GET['ru'];
+  $path = url('node/add/hotspot',array('query'=>'ru='.$reuse));
+  drupal_json(array('path'=> $path));
+}
+
+
+
+//////////////////////////////////////////////////////////////// News  ////////////////////////////////////////////////////////////////
+
+function amana_static_pages_whatsnew(){
+    $query = 'select nid from node where type = "news"';
+    $result = db_query($query);
+    $obj = db_fetch_object($result);
+
+    drupal_goto('node/'. $obj->nid .'/edit');
+    //'node/'. $node->nid .'/edit';
+    //$node_link = l(t($node->title), 'node/'. $node->nid);
+}
+
+
+/////////////////////////////////////////////////////////////// Hooks /////////////////////////////////////////////////////////////////
+
+function amana_static_pages_form_product_node_form_alter(&$form, &$form_state) {
+    $form['#validate'][] = '_amana_static_pages_product_validate';
+}
+
+function _amana_static_pages_product_validate(&$form, &$form_state){
+    
+    //implement NID check
+    //
+    //die();
+    //echo $form_state['values']['field_product_categories'][0]['value'] . '</br>';
+    //echo $form_state['clicked_button']['#value'];
+    
+    //  var_dump($form_state);die();
+
+    
+    if(isset ($form_state['values']['field_product_price'])){
+        $vals = str_split($form_state['values']['field_product_price'][0]['value']);
+        $allowed = array('.','0','1','2','3','4','5','6','7','8','9');
+        $bln = true;
+        foreach ($vals as $char){
+            if(!in_array($char ,$allowed)){
+                $bln = false;
+                break;
+            }
+        }
+
+        if(!$bln){
+            //form_error('field_product_price',t('Price can only accept digits 0-9'));
+            form_set_error('field_product_price',t('Price can only accept numerical value'));
+        }
+       
+    }
+
+}

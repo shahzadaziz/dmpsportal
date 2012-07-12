@@ -1,0 +1,5 @@
+name = Amana Common Hooks
+description = This module contains some hook implementations.
+version = "6.x"
+core = "6.x"
+package = "Amana"

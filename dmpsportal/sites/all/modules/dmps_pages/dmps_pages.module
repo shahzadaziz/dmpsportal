@@ -1,0 +1,132 @@
+<?php
+
+function dmps_pages_perm(){
+  return array('administer pages');
+}
+
+function dmps_pages_menu(){
+  $menus = array();
+
+  $menus['home'] = array(
+    
+    'page callback' => 'dmps_pages_home',
+    'access arguments' => array('administer pages'),
+    'type' => MENU_CALLBACK
+  );
+
+
+  return $menus;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////           Page Callbacks         ////////////////////////////////////////////////////////////////
+
+
+function dmps_pages_home(){
+    $output = 'home';
+    return $output;
+}
+
+
+function dmps_pages_theme(){
+  $themes = array(
+        'home' => array(
+            
+            'template' => 'dmps_page',
+        ),
+    );
+    return $themes;
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////           Video model layer         ////////////////////////////////////////////////////////////////
+
+function getVideos($category = NULL, $filter = NULL){
+ 
+  print_variable($videos);
+
+
+    $query = '';
+    if(isset ($category)){
+        $query = 'select n.nid as id,n.title as name from {content_type_video} cth inner join {node} n on cth.nid=n.nid where cth.field_category_value =' . $category;
+    }else{
+        $query = 'select n.nid as id,n.title as name from {content_type_video} cth inner join {node} n on cth.nid=n.nid ';
+    }
+}
+
+function fetchVideos($query){
+    $result = db_query($query);
+    $videos = array();
+    while($vid_obj = db_fetch_object($result)){
+        $video = array();
+        $video['name'] = $vid_obj->name;
+        $video['name'] = $vid_obj->name;
+        
+        $videos[] = $video;
+    }
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////           Common methods         ////////////////////////////////////////////////////////////////
+
+function _dmps_pages_create_table($sql_final, $sql_count){
+  $output = '';
+  $headers = array();
+  $status_options = array(0 => 'not published', 1 => 'published');
+  $headers = array(
+              array('data'=> t('Name'), 'field'=>'title'),
+              array('data'=> t('Status'), 'field'=>'status'),
+              array('data'=> t('Operation'))
+             );
+  $tablesort = tablesort_sql($headers);
+  $page_size = 10;
+
+  $result = pager_query($sql_final.$tablesort, variable_get('default_nodes_main', $page_size), 0, $sql_count);
+  $rows = array();
+  while($node = db_fetch_object($result)){
+    $row = array();
+    
+    $destination = drupal_get_destination();
+    $node_link = l(t($node->title), 'node/'. $node->nid);
+    $edit_link = l(t('edit'), 'node/'. $node->nid .'/edit', array('query' => $destination));
+    $row = array($node_link,$status_options[$node->status],$edit_link);
+    $rows[] = $row;
+    unset ($row);
+  }
+
+  $output .= theme_table($headers,$rows);
+  $output .= '<div class="next-prev">';
+  $output .= theme('pager', NULL, $page_size, 0);
+  $output .= '</div>';
+  return $output;
+
+}
+
+
+
+
+
+function getNodeTypesList($nodeType){
+  $listArray = array();
+
+  $result = db_query('select nid,title from node where type = "' . $nodeType . '"');
+  $listArray[0] = 'none';
+  while($node = db_fetch_object($result)){
+    $listArray[$node->nid] = $node->title;
+  }
+  return $listArray;
+
+}
+
+
+function print_variable($var){
+    echo 'variable value is : </br>';
+    var_dump($var);
+
+}

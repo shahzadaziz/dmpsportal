@@ -1,0 +1,5 @@
+name = Dmps Pages
+description = This module contains implementation of listing pages of different content types like Video etc.
+version = 6.x
+core = 6.x
+package = "Dmps"
